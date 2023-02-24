@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/SolidShake/go-image-resizer/internal/watermark"
 )
 
 func main() {
@@ -39,11 +40,21 @@ func main() {
 				//
 				containerProgressBar.Show()
 				//
+
+				// debug
 				files, _ := dir.List()
 				fmt.Println(files)
+				//
+
+				var filesPath []string
 				for _, file := range files {
-					fmt.Println(file)
+					if file.MimeType() == "image/jpeg" {
+						filesPath = append(filesPath, file.Path())
+					}
 				}
+
+				watermark.AddWatermarkAndMove(desktopDir, filesPath)
+
 				//
 				time.Sleep(time.Second * 2)
 				//
