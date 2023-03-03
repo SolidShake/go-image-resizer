@@ -12,7 +12,9 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/SolidShake/go-image-resizer/internal/watermark"
+
+	"github.com/SolidShake/go-image-resizer/internal/file"
+	"github.com/SolidShake/go-image-resizer/internal/image"
 )
 
 func main() {
@@ -23,10 +25,9 @@ func main() {
 
 	homeDir, _ := os.UserHomeDir()
 	desktopDir := filepath.Join(homeDir, "Desktop")
-	fmt.Println(desktopDir)
 
-	data := binding.NewFloat()
-	progressBar := widget.NewProgressBarWithData(data)
+	progressData := binding.NewFloat()
+	progressBar := widget.NewProgressBarWithData(progressData)
 	containerProgressBar := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), progressBar, layout.NewSpacer())
 	containerProgressBar.Hide()
 
@@ -45,14 +46,7 @@ func main() {
 				// debug
 				fmt.Println(dir.Name())
 
-				var filesPath []string
-				for _, file := range files {
-					if file.MimeType() == "image/jpeg" {
-						filesPath = append(filesPath, file.Path())
-					}
-				}
-
-				watermark.AddWatermarkAndMove(desktopDir, filesPath, data)
+				image.AddWatermarkAndMove(desktopDir, file.GetJpegPaths(files), progressData)
 
 				containerProgressBar.Hide()
 			}

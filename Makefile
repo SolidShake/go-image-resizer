@@ -1,7 +1,7 @@
 .PHONY: build run
 
 build:
-	go build main.go
+	go build cmd/main.go
 
 run:
-	go run main.go
+	go run cmd/main.go

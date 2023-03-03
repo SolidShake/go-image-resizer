@@ -1,41 +1,15 @@
 package watermark
 
 import (
-	"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"os"
-	"path/filepath"
 	"strings"
-	"time"
-
-	"fyne.io/fyne/v2/data/binding"
 )
 
-func AddWatermarkAndMove(userDir string, files []string, data binding.Float) {
-	currentDirName := createFolderName(userDir)
-	if err := os.Mkdir(currentDirName, os.ModePerm); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	total := 0.0
-	part := 1.0 / float64(len(files))
-
-	for _, file := range files {
-		fmt.Println(file)
-		if err := addWatermark(currentDirName, file); err != nil {
-			fmt.Println(file, err)
-		}
-
-		total += part
-		data.Set(total)
-	}
-}
-
-func addWatermark(currentDirName, file string) error {
+func AddWatermark(currentDirName, file string) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -47,7 +21,7 @@ func addWatermark(currentDirName, file string) error {
 		return err
 	}
 
-	wmb, err := os.Open("watermark.png")
+	wmb, err := os.Open("assets/watermark.png")
 	if err != nil {
 		return err
 	}
@@ -58,12 +32,15 @@ func addWatermark(currentDirName, file string) error {
 	}
 	defer wmb.Close()
 
-	offset := image.Pt(200, 200)
+	x := img.Bounds().Dx()/2 - watermark.Bounds().Dx()/2
+	y := img.Bounds().Dy() / 2
+
+	offset := image.Pt(x, y)
 	// missing SOI marker error if not .jgeg
 	b := img.Bounds()
 	m := image.NewRGBA(b)
-	draw.Draw(m, b, img, image.ZP, draw.Src)
-	draw.Draw(m, watermark.Bounds().Add(offset), watermark, image.ZP, draw.Over)
+	draw.Draw(m, b, img, image.Point{}, draw.Src)
+	draw.Draw(m, watermark.Bounds().Add(offset), watermark, image.Point{}, draw.Over)
 
 	filePath := strings.Split(file, "/")
 	fileName := filePath[len(filePath)-1]
@@ -72,14 +49,8 @@ func addWatermark(currentDirName, file string) error {
 	if err != nil {
 		return err
 	}
-	jpeg.Encode(imgw, m, &jpeg.Options{jpeg.DefaultQuality})
+	jpeg.Encode(imgw, m, &jpeg.Options{Quality: jpeg.DefaultQuality})
 	defer imgw.Close()
 
 	return nil
-}
-
-func createFolderName(userDir string) string {
-	currentTime := time.Now().Format("2006-01-02_15-04-05")
-
-	return filepath.Join(userDir, currentTime)
 }
