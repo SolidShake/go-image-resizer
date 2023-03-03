@@ -10,19 +10,28 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"fyne.io/fyne/v2/data/binding"
 )
 
-func AddWatermarkAndMove(userDir string, files []string) {
+func AddWatermarkAndMove(userDir string, files []string, data binding.Float) {
 	currentDirName := createFolderName(userDir)
 	if err := os.Mkdir(currentDirName, os.ModePerm); err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	total := 0.0
+	part := 1.0 / float64(len(files))
+
 	for _, file := range files {
+		fmt.Println(file)
 		if err := addWatermark(currentDirName, file); err != nil {
-			fmt.Println(err)
+			fmt.Println(file, err)
 		}
+
+		total += part
+		data.Set(total)
 	}
 }
 

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	a := app.New()
-	w := a.NewWindow("Hello")
+	w := a.NewWindow("Watermark Photo Resizer")
 	w.Resize(fyne.NewSize(700, 400))
 	w.CenterOnScreen()
 
@@ -25,7 +25,8 @@ func main() {
 	desktopDir := filepath.Join(homeDir, "Desktop")
 	fmt.Println(desktopDir)
 
-	progressBar := widget.NewProgressBarInfinite()
+	data := binding.NewFloat()
+	progressBar := widget.NewProgressBarWithData(data)
 	containerProgressBar := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), progressBar, layout.NewSpacer())
 	containerProgressBar.Hide()
 
@@ -37,14 +38,12 @@ func main() {
 			}
 
 			if dir != nil {
-				//
 				containerProgressBar.Show()
-				//
+
+				files, _ := dir.List()
 
 				// debug
-				files, _ := dir.List()
-				fmt.Println(files)
-				//
+				fmt.Println(dir.Name())
 
 				var filesPath []string
 				for _, file := range files {
@@ -53,11 +52,8 @@ func main() {
 					}
 				}
 
-				watermark.AddWatermarkAndMove(desktopDir, filesPath)
+				watermark.AddWatermarkAndMove(desktopDir, filesPath, data)
 
-				//
-				time.Sleep(time.Second * 2)
-				//
 				containerProgressBar.Hide()
 			}
 		}, w)
@@ -67,8 +63,10 @@ func main() {
 
 	containers := container.New(
 		layout.NewVBoxLayout(),
+		layout.NewSpacer(),
 		container.New(layout.NewHBoxLayout(), layout.NewSpacer(), containerButton, layout.NewSpacer()),
 		containerProgressBar,
+		layout.NewSpacer(),
 	)
 	w.SetContent(containers)
 
