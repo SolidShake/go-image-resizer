@@ -36,11 +36,11 @@ func main() {
 
 				files, _ := dir.List()
 
-				if err := image.AddWatermarkAndMove(file.GetJpegPaths(files), progressData); err != nil {
+				if err := image.AddWatermarkAndMove(file.GetJpegPaths(files), resourceWatermarkPng, progressData); err != nil {
 					dialog.ShowError(err, w)
-				} else {
-					dialog.ShowInformation("", "Фотографии успешно обработаны", w)
 				}
+
+				dialog.ShowInformation("", "Фотографии успешно обработаны", w)
 
 				containerProgressBar.Hide()
 			}

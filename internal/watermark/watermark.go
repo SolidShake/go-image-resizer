@@ -1,6 +1,7 @@
 package watermark
 
 import (
+	"bytes"
 	"image"
 	"image/draw"
 	"image/jpeg"
@@ -11,7 +12,7 @@ import (
 	"github.com/nfnt/resize"
 )
 
-func AddWatermark(currentDirName, file string) error {
+func AddWatermark(currentDirName, file string, pngBytes []byte) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -25,16 +26,12 @@ func AddWatermark(currentDirName, file string) error {
 
 	img = resize.Resize(2500, 0, img, resize.Lanczos3)
 
-	wmb, err := os.Open("assets/watermark.png")
+	watermark, err := png.Decode(bytes.NewReader(pngBytes))
 	if err != nil {
 		return err
 	}
 
-	watermark, err := png.Decode(wmb)
-	if err != nil {
-		return err
-	}
-	defer wmb.Close()
+	watermark = resize.Resize(2500, 0, watermark, resize.Lanczos3)
 
 	x := img.Bounds().Dx()/2 - watermark.Bounds().Dx()/2
 	y := img.Bounds().Dy()/2 - watermark.Bounds().Dx()/2
