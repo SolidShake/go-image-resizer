@@ -7,6 +7,8 @@ import (
 	"image/png"
 	"os"
 	"strings"
+
+	"github.com/nfnt/resize"
 )
 
 func AddWatermark(currentDirName, file string) error {
@@ -21,6 +23,8 @@ func AddWatermark(currentDirName, file string) error {
 		return err
 	}
 
+	img = resize.Resize(2500, 0, img, resize.Lanczos3)
+
 	wmb, err := os.Open("assets/watermark.png")
 	if err != nil {
 		return err
@@ -33,11 +37,12 @@ func AddWatermark(currentDirName, file string) error {
 	defer wmb.Close()
 
 	x := img.Bounds().Dx()/2 - watermark.Bounds().Dx()/2
-	y := img.Bounds().Dy() / 2
+	y := img.Bounds().Dy()/2 - watermark.Bounds().Dx()/2
 
 	offset := image.Pt(x, y)
 	// missing SOI marker error if not .jpeg
 	b := img.Bounds()
+
 	m := image.NewRGBA(b)
 	draw.Draw(m, b, img, image.Point{}, draw.Src)
 	draw.Draw(m, watermark.Bounds().Add(offset), watermark, image.Point{}, draw.Over)
