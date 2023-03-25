@@ -36,7 +36,7 @@ func AddWatermark(currentDirName, file string) error {
 	y := img.Bounds().Dy() / 2
 
 	offset := image.Pt(x, y)
-	// missing SOI marker error if not .jgeg
+	// missing SOI marker error if not .jpeg
 	b := img.Bounds()
 	m := image.NewRGBA(b)
 	draw.Draw(m, b, img, image.Point{}, draw.Src)

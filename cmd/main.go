@@ -1,10 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -23,15 +19,12 @@ func main() {
 	w.Resize(fyne.NewSize(700, 400))
 	w.CenterOnScreen()
 
-	homeDir, _ := os.UserHomeDir()
-	desktopDir := filepath.Join(homeDir, "Desktop")
-
 	progressData := binding.NewFloat()
 	progressBar := widget.NewProgressBarWithData(progressData)
 	containerProgressBar := container.New(layout.NewVBoxLayout(), layout.NewSpacer(), progressBar, layout.NewSpacer())
 	containerProgressBar.Hide()
 
-	uploadButton := widget.NewButton("Выбрать файлы", func() {
+	uploadButton := widget.NewButton("Выбрать файлы для добавления вотермарки", func() {
 		filesOpen := dialog.NewFolderOpen(func(dir fyne.ListableURI, err error) {
 			if err != nil {
 				dialog.ShowError(err, w)
@@ -43,10 +36,11 @@ func main() {
 
 				files, _ := dir.List()
 
-				// debug
-				fmt.Println(dir.Name())
-
-				image.AddWatermarkAndMove(desktopDir, file.GetJpegPaths(files), progressData)
+				if err := image.AddWatermarkAndMove(file.GetJpegPaths(files), progressData); err != nil {
+					dialog.ShowError(err, w)
+				} else {
+					dialog.ShowInformation("", "Фотографии успешно обработаны", w)
+				}
 
 				containerProgressBar.Hide()
 			}

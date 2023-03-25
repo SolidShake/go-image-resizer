@@ -1,6 +1,7 @@
 package file
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,8 @@ import (
 
 	"fyne.io/fyne/v2"
 )
+
+var createNewFolderError = errors.New("Не удалось создать папку для фотографий")
 
 func GetJpegPaths(files []fyne.URI) []string {
 	var jpegPaths []string
@@ -21,18 +24,24 @@ func GetJpegPaths(files []fyne.URI) []string {
 	return jpegPaths
 }
 
-func CreateFolder(userDir string) (string, error) {
-	currentDirName := createFolderName(userDir)
+func CreateNewFolder() (string, error) {
+	currentDirName := createNewFolderName()
 	if err := os.Mkdir(currentDirName, os.ModePerm); err != nil {
 		fmt.Println(err)
-		return "", err
+		return "", errors.Join(createNewFolderError, err)
 	}
 
 	return currentDirName, nil
 }
 
-func createFolderName(userDir string) string {
+func createNewFolderName() string {
 	currentTime := time.Now().Format("2006-01-02_15-04-05")
 
-	return filepath.Join(userDir, currentTime)
+	return filepath.Join(createDesktopFolderName(), currentTime)
+}
+
+func createDesktopFolderName() string {
+	homeDir, _ := os.UserHomeDir()
+
+	return filepath.Join(homeDir, "Desktop")
 }
